@@ -1,0 +1,30 @@
+{
+  "name": "liskill-marketplace",
+  "owner": {
+    "name": "Li-TongXue"
+  },
+  "metadata": {
+    "description": "liskill 中文内容创作与创业经营 Skills",
+    "version": "1.0.1"
+  },
+  "plugins": [
+    {
+      "name": "liskill",
+      "description": "1 个中文 Skill，按内容创作与创业经营分类。",
+      "source": "./",
+      "strict": false,
+      "version": "1.0.1",
+      "category": "productivity",
+      "keywords": [
+        "content",
+        "business",
+        "management",
+        "chinese"
+      ],
+      "skills": [
+        "./skills/li",
+        "./skills/li-startup-role-diagnosis"
+      ]
+    }
+  ]
+}

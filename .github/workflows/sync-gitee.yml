@@ -1,0 +1,53 @@
+name: Sync to Gitee
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-gitee
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Gitee SSH key
+        env:
+          GITEE_SSH_PRIVATE_KEY: ${{ secrets.GITEE_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$GITEE_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H gitee.com >> ~/.ssh/known_hosts
+
+      - name: Sync branch or tag
+        env:
+          GITEE_REPOSITORY: git@gitee.com:LTX12/liskill.git
+        run: |
+          set -euo pipefail
+          git remote add gitee "$GITEE_REPOSITORY"
+          if [ "$GITHUB_REF_TYPE" = "branch" ]; then
+            git push gitee HEAD:refs/heads/main
+          else
+            git push gitee "refs/tags/$GITHUB_REF_NAME"
+          fi
+
+      - name: Validate release
+        if: github.ref_type == 'tag'
+        run: python3 tools/check-release.py
+
+      - name: Build release bundle
+        if: github.ref_type == 'tag'
+        run: bash tools/build-skills.sh
